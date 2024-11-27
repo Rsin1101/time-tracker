@@ -1,0 +1,59 @@
+apiVersion: privatecloud.mendix.com/v1alpha1
+kind: MendixApp
+metadata:
+  name: upsellprod
+spec:
+  database: # Specification of Database CR
+    servicePlan: upsellprod
+  storage: # Specification of Storage CR
+    servicePlan: mendixprodstracc
+  # mendixRuntimeVersion: 10.12.1 # Studio Pro version of the Mendix app
+  sourceURL: https://mendixprodstracc.blob.core.windows.net/mendixprod/Upsell_1.0.1.288.mda?sp=r&st=2024-10-21T12:07:42Z&se=2024-10-21T20:07:42Z&spr=https&sv=2022-11-02&sr=b&sig=YW2nHAvMS4yEE0RPGSFAsW%2B4LMaU7HKfNBP%2FKUPqdQk%3D # URL of App's source MDA or prebuilt OCI image
+  appURL: upsell.pmendix.honeywell.com # URL to access the app - example-mendixapp.k8s-cluster.example.com
+  tls: # Optional, can be omitted : set a custom TLS configuration, overriding the default operator configuration
+    # Enable or disable TLS for the app
+    enableTLS: true
+    # Optional: name of an existing kubernetes.io/tls secret containing the TLS certificate
+    secretName: upsellprod-mendix-tls-secret
+  replicas: 1 # Number of replicas, set to 0 to stop all replicas
+  resources: # Optional, can be omitted : set resources for Mendix Runtime container  
+    limits: # Upper limit - process will be stopped if it tries to use more
+      cpu: 1000m # 500 millicores - half of a vCPU
+      memory: 2000Mi # 512 megabytes - suitable for small-scale non-production apps
+    requests: # Lower limit - needs at least these resources
+      cpu: 500m
+      memory: 1000Mi
+  endpointAnnotations:
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "server: hide";
+      more_set_headers "X-Content-Type-Options: nosniff";
+      more_set_headers "X-Frame-Options: SAMEORIGIN";
+      more_set_headers "CSP frame: ancestors";
+      more_set_headers "X-Xss-Protection: 1";
+      more_set_headers "Setting Cache-Control: must-re-validate";
+      more_set_headers "Cache-Control: no-cache, no-store";
+      more_set_headers "Expires: 0";
+      more_set_headers "Pragma: no-cache";
+  runtime: # Configuration of the Mendix Runtime
+    runtimeLicense: # Mendix Runtime License configuration
+      type: offline # Set to offline
+      id: 31ca583c-6f0c-4d20-8728-f27ffc1520e8 # Offline LicenseId (UUID) value provided by Mendix Support
+      key: LS0tLS1CRUdJTiBQR1AgU0lHTkVEIE1FU1NBR0UtLS0tLQpIYXNoOiBTSEExCgp7IklzUHJvZHVjdGlvbiI6ZmFsc2UsIkNvbXBvbmVudHMiOlsiTW9iaWxlIl0sIkNvbXBhbnkiOiJIb25leXdlbGwiLCJTZXBhcmF0ZUFub255bW91c1VzZXJzIjp0cnVlLCJFeHBpcmF0aW9uRGF0ZSI6MTc0NDY3NTIwMDAwMCwiR3JhY2VQZXJpb2RJbkRheXMiOjMwLCJVc2VyTGltaXRhdGlvbnMiOlt7IkxpbWl0YXRpb25UeXBlIjoiTmFtZWQiLCJBbW91bnRUeXBlIjoiVW5saW1pdGVkIn0seyJMaW1pdGF0aW9uVHlwZSI6IkNvbmN1cnJlbnQiLCJBbW91bnRUeXBlIjoiVW5saW1pdGVkIn0seyJMaW1pdGF0aW9uVHlwZSI6IkNvbmN1cnJlbnRBbm9ueW1vdXMiLCJBbW91bnRUeXBlIjoiVW5saW1pdGVkIn1dLCJMaWNlbnNlSUQiOiI2VWlRQWJUWkNyNkt0OWZ5OG53ZExzVzhUcFE9IiwiTGljZW5zZVR5cGUiOiJTdWJzY3JpcHRpb24iLCJSdW50aW1lTW9kZSI6IlByb2R1Y3Rpb24ifQotLS0tLUJFR0lOIFBHUCBTSUdOQVRVUkUtLS0tLQpWZXJzaW9uOiBCQ1BHIHYxLjY0CgppUUpQQkFFQkFnQTVCUUptdTRpaE1oeE5aVzVrYVhnZ1RHbGpaVzV6WlNCVGFXZHVhVzVuSUV0bGVTQThiR2xqClpXNXphVzVuUUcxbGJtUnBlQzVqYjIwK0FBb0pFSmpoek1PZXdOUmwyZWdRQUk5TTB5UFYweDZybWNvb04zVTUKaXZwUXBXMnFFdzRKTHY1NXRDWjZrYWdaTmRtYnVYaWo0QUUvY1RuTlJwUHhkQkxtOG92TmxPeVBndGQwSmtoVQpiQldIMUlCbEJPMXdieUJ1YXRGbmFaMC9jR0dQVFZjdzlOOTJvODhzYjlUKzAxUllhb0xJTDBFZmZMMXJWT01PCmhFWVNSOHNWdHA2eW1DaGc0ZHlmWjcyWjFWdFoxQkptNUg5WWUyWDZNNm9qNGNNeUcvRTVEbE5sdUltajMxdFQKek1STG0xRHlqbVhPWWE4dTY5MmlINFlUVXl5Sk02Ykd3R3hmYVUrKzViWDVvT2p2bElFZXRIRDVLMHZsNWU1UApUZ0N3MjdSSDVJVS9YQk1ybmRveFltR1VUZVRtL0hOTXczY2JickZyWStDdDFnOXhETlV6cDdtaEpDWnpvcVdCClBYek9sLzE3RWQvNG04L3VVUFllNmRlR1ZRaU5ZcGtpUFZqUC93OHVoZ2cyUEhFd2tJcmpWSUc0WmM2UXZnSXQKaVp6RThlUFRWMlJJbVh3RWlKUjdLR1cxMGlDT1hndm9lZSt1ZGZEbm1RZlRibFZvanVPcElXdkxiYVREMFFKZQpFWmZ4bmdjemFYV3JBTkNyZ20xdlhYVTBZTnhoeDNQTENHSm5DOVNYQjJWSVF5Y1BWVnJ3NlhrQ0FvK095Y0liCkdCdFMvblhHMTBNaWx2bkNmazZXd1dFWUJWb2NPdjhRMzd3U1dkYzBxU1Z2dTdTL3g4bmR2VUFmZ3hNdEkvNmUKNklQcDgzNXE3SmdyeHJmdFNNM210Tkd4ZmdlUXU1OVdqaE93MUx5dW1nWFJScjF4UU1DM3VYWVZTbHNuUmVhRwpDNmdMVEtHSjFsaDZnanFtbWdvTW42QmwKPXNTc2EKLS0tLS1FTkQgUEdQIFNJR05BVFVSRS0tLS0tCg==
+    logAutosubscribeLevel: INFO # Default logging level
+    mxAdminPassword: TTNuZGl4QzAzQGRtaW5QcjBk # base64 encoded password for MxAdmin user. In this example, 'M3ndixC03@dminPr0d'; can be left empty keep password unchanged
+    debuggerPassword: V2VsYzBtZSE= # base64 encoded password for debuggerPassword. In this example, 'Welc0me!';
+    dtapMode: P # Security & runtime mode: P for production, D for development
+    scheduledEventExecution: SPECIFIED
+    myScheduledEvents:
+      - Upsell.SE_AM_Daily
+      - Upsell.SE_AM_Monthly
+      - Upsell.SE_AM_Weekly
+      - Upsell.SE_AM_Weekly_Escalation
+      - Upsell.SE_PM_Weekly_Escalation
+      - Upsell.SE_SFTP 
+    customConfiguration: |-
+      {
+        "EnableKeepAlive": false,
+        "SessionTimeout": 900000
+      }
+

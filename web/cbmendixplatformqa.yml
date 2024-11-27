@@ -1,0 +1,38 @@
+apiVersion: privatecloud.mendix.com/v1alpha1
+kind: MendixApp
+metadata:
+  name: cbmendixqa
+spec:
+  database: # Specification of Database CR
+    servicePlan: cbmendixqa
+  storage: # Specification of Storage CR
+    servicePlan: mendixqastracc
+  # mendixRuntimeVersion: 10.10.0.34429 # Studio Pro version of the Mendix app
+  sourceURL: https://mendixqastracc.blob.core.windows.net/mendixqa/App_1.0.0.0646f0ed.mda?sp=r&st=2024-11-22T13:20:32Z&se=2024-11-22T21:20:32Z&spr=https&sv=2022-11-02&sr=b&sig=1nPGNJMemg%2FgyRoXPLhaArdm6UZdJZ%2B1XR3jodjws2Q%3D # URL of App's source MDA or prebuilt OCI image
+  appURL: qmendix.honeywell.com # URL to access the app - example-mendixapp.k8s-cluster.example.com
+  tls: # Optional, can be omitted : set a custom TLS configuration, overriding the default operator configuration
+    # Enable or disable TLS for the app
+    enableTLS: true
+    # Optional: name of an existing kubernetes.io/tls secret containing the TLS certificate
+    secretName: upsell-mendixqa-tls-secret
+  replicas: 1 # Number of replicas, set to 0 to stop all replicas
+  resources: # Optional, can be omitted : set resources for Mendix Runtime container
+    limits: # Upper limit - process will be stopped if it tries to use more
+      cpu: 1000m # 500 millicores - half of a vCPU
+      memory: 2000Mi # 512 megabytes - suitable for small-scale non-production apps
+    requests: # Lower limit - needs at least these resources
+      cpu: 500m
+      memory: 1000Mi
+  runtime: # Configuration of the Mendix Runtime
+    runtimeLicense: # Mendix Runtime License configuration
+      type: offline # Set to offline
+      id: 2d2062d8-9921-457c-9fb3-647007b5e25e # Offline LicenseId (UUID) value provided by Mendix Support
+      key: LS0tLS1CRUdJTiBQR1AgU0lHTkVEIE1FU1NBR0UtLS0tLQpIYXNoOiBTSEExCgp7IklzUHJvZHVjdGlvbiI6ZmFsc2UsIkNvbXBvbmVudHMiOlsiTW9iaWxlIl0sIkNvbXBhbnkiOiJIb25leXdlbGwiLCJTZXBhcmF0ZUFub255bW91c1VzZXJzIjp0cnVlLCJFeHBpcmF0aW9uRGF0ZSI6MTc0NDY3NTIwMDAwMCwiR3JhY2VQZXJpb2RJbkRheXMiOjMwLCJVc2VyTGltaXRhdGlvbnMiOlt7IkxpbWl0YXRpb25UeXBlIjoiTmFtZWQiLCJBbW91bnRUeXBlIjoiVW5saW1pdGVkIn0seyJMaW1pdGF0aW9uVHlwZSI6IkNvbmN1cnJlbnQiLCJBbW91bnRUeXBlIjoiVW5saW1pdGVkIn0seyJMaW1pdGF0aW9uVHlwZSI6IkNvbmN1cnJlbnRBbm9ueW1vdXMiLCJBbW91bnRUeXBlIjoiVW5saW1pdGVkIn1dLCJMaWNlbnNlSUQiOiJNdGV0dVdtVGFwYjd3Q1ZsV29PNmVjdjk2VWc9IiwiTGljZW5zZVR5cGUiOiJTdWJzY3JpcHRpb24iLCJSdW50aW1lTW9kZSI6IlByb2R1Y3Rpb24ifQotLS0tLUJFR0lOIFBHUCBTSUdOQVRVUkUtLS0tLQpWZXJzaW9uOiBCQ1BHIHYxLjY0CgppUUpQQkFFQkFnQTVCUUptb3JNT01oeE5aVzVrYVhnZ1RHbGpaVzV6WlNCVGFXZHVhVzVuSUV0bGVTQThiR2xqClpXNXphVzVuUUcxbGJtUnBlQzVqYjIwK0FBb0pFSmpoek1PZXdOUmwxS0FQLzB2aFZ4bE1TTHpPTHFNSWM4U2UKcGJQd1UzckswL0ROa2V3L29ybzlveStvMGUvQ2wyVnk0Q2piVnlyaVpndUNHam5yNDc1RHRyUERzVnRaVVVZeApud2VTdEtyZUd3ZHZPQlJ0d1JTYWxLdjVqak9KbVZjYmZVU1YweG5Eb1FpOWRsVGRCbVNNSFVMN2lIOTVaOU85ClBmOUZqaHFNdlVwTUsxeFE1cXE5VjZWQ1U3ZnBjakhWZDE0QVMwM1dMVjcyNEJqa29oUGtLRTJ4aUh0bW9TTTUKVUY2enlKYmlTQk9GVXBMY21QY1pKcG9GWGxiVWZ4aW5ibWFqYVdLYXNHdE82MGxkQ0orbEVyemE0WXNHNkJESwptZEptRUxjbzZVNW5QRjZXbml4SVNKZStBVmxPcGNzVkc4cVlva01Sd3Vmc3lDejFQdHFUa25YbThHdlA0cWNFCjVpY2RoL05IekpkVWVsYXdSQUxxT3RkaFNWNlFKaXQ5NVVOSDA3eURWbEx6dzBqeWpMalduRmFPaGZGN05vVVUKLy8raE9UbE0xRkFwK3B1SGZHTmk3d09CMWIyaWI0OUhOaEkvRlVJY0pSamxIcVJ1Ym5nZmExeUIzZDh6N0FqcQo0bGh3b05wOGlLaTFpRWdTYStlUzQvNTJhcjlTYlRaNTg2Y0lsR3hSVk9PODNuU0RKVkdOdTNLdXkwaCtUUGV3CjdWd0lldzY4Vi9ncXVNeTJpVWxLZ1l0TVZBWWlWQ0ZFNFlPWUwwYXQyaGVpTzFMbTh5ZldrQ3B4dndZL2tNYUgKdWtzWWh1R0c0NWk1MHNaR0FJcVVhVEMxRXh4aldrMFlQdko5bXloNzgvQTNCeHhwYTdJU3FvdU50SnVkK29UcAowYUp4dXhtM3ROOUdMZEFlM1E2QkR3OVMKPTJSbjcKLS0tLS1FTkQgUEdQIFNJR05BVFVSRS0tLS0tCg==
+    logAutosubscribeLevel: INFO # Default logging level
+    mxAdminPassword: TWVuZGl4Q0JARDN2RW52 # base64 encoded password for MxAdmin user. In this example, 'MendixCB@D3vEnv'; can be left empty keep password unchanged unchanged
+    debuggerPassword: V2VsYzBtZSE= # base64 encoded password for debuggerPassword. In this example, 'Welc0me!';
+    dtapMode: P # Security & runtime mode: P for production, D for development
+    logLevels: 
+      ConnectionBus_Update: TRACE
+    
+    
